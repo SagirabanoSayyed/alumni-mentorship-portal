@@ -1,11 +1,21 @@
 package com.alumniportal.dto;
 
+import com.alumniportal.enums.Role;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class RegisterRequest {
 
+	@NotBlank
     private String fullName;
+	
+	@Email
     private String email;
+	
+	@NotBlank
     private String password;
-    private String role;
+    private Role role;
 
     public String getFullName() {
         return fullName;
@@ -31,11 +41,11 @@ public class RegisterRequest {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 }

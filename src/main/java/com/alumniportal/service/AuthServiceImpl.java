@@ -18,12 +18,17 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
+
     @Autowired
     private JwtUtil jwtUtil;
 
     @Override
     public String register(RegisterRequest request) {
+
+        // Check if email already exists
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return "Email already exists";
+        }
 
         User user = new User();
 
@@ -34,6 +39,8 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(
                 passwordEncoder.encode(
                         request.getPassword()));
+
+        user.setActive(true);
 
         userRepository.save(user);
 
@@ -51,15 +58,19 @@ public class AuthServiceImpl implements AuthService {
             return "User Not Found";
         }
 
+        if (!user.isActive()) {
+            return "Account Deactivated";
+        }
+
         boolean isValid = passwordEncoder.matches(
                 request.getPassword(),
                 user.getPassword());
 
-        if (isValid) {
-        	return jwtUtil.generateToken(
-        	        user.getEmail());
+        if (!isValid) {
+            return "Invalid Password";
         }
 
-        return "Invalid Password";
+        return jwtUtil.generateToken(
+                user.getEmail());
     }
 }

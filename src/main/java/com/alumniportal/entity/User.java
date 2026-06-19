@@ -1,64 +1,121 @@
 package com.alumniportal.entity;
+import com.alumniportal.enums.Role;
+import java.time.LocalDateTime;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long userId;
 
-    private String fullName;
+	private String fullName;
 
-    @Column(unique = true)
-    private String email;
+	@Column(unique = true, nullable = false)
+	private String email;
 
-    private String password;
+	@Column(nullable = false)
+	private String password;
 
-    private String role;
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
-    public User() {
-    }
+	private boolean active=true;
 
-    public Long getId() {
-        return id;
-    }
+	private LocalDateTime createdAt;
+	
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public User() {
+		
+	}
+	
+	public User(Long userId, String fullName, String email, String password, Role role, boolean active,
+			LocalDateTime createdAt) {
+		super();
+		this.userId = userId;
+		this.fullName = fullName;
+		this.email = email;
+		this.password = password;
+		this.role = role;
+		this.active = active;
+		this.createdAt = createdAt;
+	}
+	
+	public Long getUserId() {
+		return userId;
+	}
 
-    public String getFullName() {
-        return fullName;
-    }
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
+	public String getFullName() {
+		return fullName;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public String getRole() {
-        return role;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public void setRole(String role) {
-        this.role = role;
-    }
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	@PrePersist
+	public void prePersist() {
+	    createdAt = LocalDateTime.now();
+	}
+	
+	@Override
+	public String toString() {
+		return "User [userId=" + userId + ", fullName=" + fullName + ", email=" + email + 
+				", role=" + role + ", active=" + active + ", createdAt=" + createdAt + "]";
+	}
 }
