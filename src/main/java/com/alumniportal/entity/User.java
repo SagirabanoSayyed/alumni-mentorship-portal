@@ -20,6 +20,8 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long userId;
 
+	
+
 	private String fullName;
 
 	@Column(unique = true, nullable = false)
@@ -35,13 +37,12 @@ public class User {
 
 	private LocalDateTime createdAt;
 	
-
-	public User() {
-		
-	}
+	private String otp;
 	
+	private LocalDateTime otpExpiry;
+
 	public User(Long userId, String fullName, String email, String password, Role role, boolean active,
-			LocalDateTime createdAt) {
+			LocalDateTime createdAt, String otp, LocalDateTime otpExpiry) {
 		super();
 		this.userId = userId;
 		this.fullName = fullName;
@@ -50,7 +51,34 @@ public class User {
 		this.role = role;
 		this.active = active;
 		this.createdAt = createdAt;
+		this.otp = otp;
+		this.otpExpiry = otpExpiry;
 	}
+	
+	public String getOtp() {
+		return otp;
+	}
+
+	public void setOtp(String otp) {
+		this.otp = otp;
+	}
+
+	public LocalDateTime getOtpExpiry() {
+		return otpExpiry;
+	}
+
+	public void setOtpExpiry(LocalDateTime otpExpiry) {
+		this.otpExpiry = otpExpiry;
+	}
+
+	
+	
+
+	public User() {
+		
+	}
+	
+	
 	
 	public Long getUserId() {
 		return userId;
