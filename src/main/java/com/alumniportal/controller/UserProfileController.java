@@ -3,10 +3,15 @@ package com.alumniportal.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.alumniportal.dto.UserProfileRequest;
+import com.alumniportal.entity.User;
 import com.alumniportal.entity.UserProfile;
+import com.alumniportal.repository.UserRepository;
+import com.alumniportal.security.JwtUtil;
 import com.alumniportal.service.UserProfileService;
 
 @RestController
@@ -15,13 +20,36 @@ public class UserProfileController {
 
     @Autowired
     private UserProfileService userProfileService;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @GetMapping("/all")
+    public List<UserProfile> getAllProfiles() {
+
+        return userProfileService.getAllProfiles();
+    }
 
     @PostMapping
     public UserProfile createProfile(
+            @RequestHeader("Authorization")
+            String authHeader,
             @RequestBody UserProfileRequest request) {
 
+        String token = authHeader.substring(7);
+
+        String email =
+                jwtUtil.extractUsername(token);
+
+        User user =
+                userRepository.findByEmail(email)
+                .orElseThrow();
+
         return userProfileService
-                .createProfile(request);
+                .createProfile(user, request);
     }
 
     @GetMapping("/{userId}")
@@ -78,4 +106,32 @@ public class UserProfileController {
 
         return userProfileService.searchByGraduationYear(year);
     }
+    
+    @GetMapping
+    public UserProfile getLoggedInUserProfile(
+            @RequestHeader("Authorization")
+            String authHeader) {
+
+        String token = authHeader.substring(7);
+
+        String email = jwtUtil.extractUsername(token);
+
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow();
+
+        UserProfile profile =
+                userProfileService.getProfile(user.getUserId());
+
+        if(profile == null) {
+            throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Profile Not Found"
+            );
+        }
+
+        return profile;
+    }
+    
+    
 }

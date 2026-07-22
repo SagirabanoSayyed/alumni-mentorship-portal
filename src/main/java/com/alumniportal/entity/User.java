@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "users")
@@ -21,13 +22,15 @@ public class User {
 	private Long userId;
 
 	
-
+	@NotBlank(message = "Full Name is required")
 	private String fullName;
 
 	@Column(unique = true, nullable = false)
+	@NotBlank(message = "Email is required")
 	private String email;
 
 	@Column(nullable = false)
+	@NotBlank(message = "Password is required")
 	private String password;
 
 	@Enumerated(EnumType.STRING)

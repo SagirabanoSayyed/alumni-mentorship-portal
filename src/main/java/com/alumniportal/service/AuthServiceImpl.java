@@ -12,142 +12,148 @@ import com.alumniportal.dto.RegisterRequest;
 import com.alumniportal.dto.ResetPasswordRequest;
 import com.alumniportal.dto.VerifyOtpRequest;
 import com.alumniportal.entity.User;
+import com.alumniportal.entity.UserProfile;
+import com.alumniportal.repository.UserProfileRepository;
 import com.alumniportal.repository.UserRepository;
 import com.alumniportal.security.JwtUtil;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
+	@Autowired
+	private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+	@Autowired
+	private JwtUtil jwtUtil;
 
-    @Override
-    public String register(RegisterRequest request) {
+	@Autowired
+	private UserProfileRepository userProfileRepository;
+	@Override
+	public String register(RegisterRequest request) {
 
-        // Check if email already exists
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return "Email already exists";
-        }
+		
+		// Check if email already exists
+		if (userRepository.existsByEmail(request.getEmail())) {
+			return "Email already exists";
+		}
 
-        User user = new User();
+		User user = new User();
 
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
-        user.setRole(request.getRole());
+		user.setFullName(request.getFullName());
+		user.setEmail(request.getEmail());
+		user.setRole(request.getRole());
+		System.out.println("ROLE = " + request.getRole());
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        user.setPassword(
-                passwordEncoder.encode(
-                        request.getPassword()));
+		user.setActive(true);
 
-        user.setActive(true);
+		User savedUser = userRepository.save(user);
 
-        userRepository.save(user);
+		UserProfile profile = new UserProfile();
 
-        return "User Registered Successfully";
-    }
+		profile.setUser(savedUser);
 
-    @Override
-    public String login(LoginRequest request) {
+		profile.setAboutMe("");
+		profile.setCompany("");
+		profile.setDesignation("");
+		profile.setIndustry("");
+		profile.setGraduationYear(null);
+		profile.setLinkedinUrl("");
+		profile.setGithubUrl("");
+		profile.setResumeUrl("");
+		profile.setProfilePicture("");
 
-        User user = userRepository
-                .findByEmail(request.getEmail())
-                .orElse(null);
+		userProfileRepository.save(profile);
 
-        if (user == null) {
-            return "User Not Found";
-        }
+		return "User Registered Successfully";
+	}
 
-        if (!user.isActive()) {
-            return "Account Deactivated";
-        }
+	@Override
+	public String login(LoginRequest request) {
+		
+		System.out.println("Email received = "
+	            + request.getEmail());
 
-        boolean isValid = passwordEncoder.matches(
-                request.getPassword(),
-                user.getPassword());
+		User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+		System.out.println("Email received = " + request.getEmail());
+		System.out.println("User found = " + user);
 
-        if (!isValid) {
-            return "Invalid Password";
-        }
+		if (user == null) {
+			return "User Not Found";
+		}
 
-        return jwtUtil.generateToken(
-                user.getEmail());
-    }
-    
-    @Override
-    public String forgotPassword(ForgotPasswordRequest request) {
+		if (!user.isActive()) {
+			return "Account Deactivated";
+		}
 
-        User user = userRepository
-                .findByEmail(request.getEmail())
-                .orElse(null);
+		boolean isValid = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        if (user == null) {
-            return "User Not Found";
-        }
+		if (!isValid) {
+			return "Invalid Password";
+		}
 
-        String otp =
-                String.valueOf(
-                        (int)(Math.random() * 900000) + 100000);
+		return jwtUtil.generateToken(user.getEmail());
+	}
 
-        user.setOtp(otp);
-        user.setOtpExpiry(
-                LocalDateTime.now().plusMinutes(5));
+	@Override
+	public String forgotPassword(ForgotPasswordRequest request) {
 
-        userRepository.save(user);
+		User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
-        return "Generated OTP : " + otp;
-    }
-    
-    @Override
-    public String verifyOtp(VerifyOtpRequest request) {
+		if (user == null) {
+			return "User Not Found";
+		}
 
-        User user = userRepository
-                .findByEmail(request.getEmail())
-                .orElse(null);
+		String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
 
-        if(user == null) {
-            return "User Not Found";
-        }
+		user.setOtp(otp);
+		user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
 
-        if(!user.getOtp().equals(request.getOtp())) {
-            return "Invalid OTP";
-        }
+		userRepository.save(user);
 
-        if(LocalDateTime.now()
-                .isAfter(user.getOtpExpiry())) {
+		return "Generated OTP : " + otp;
+	}
 
-            return "OTP Expired";
-        }
+	@Override
+	public String verifyOtp(VerifyOtpRequest request) {
 
-        return "OTP Verified";
-    }
-    
-    @Override
-    public String resetPassword(
-            ResetPasswordRequest request) {
+		User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
-        User user = userRepository
-                .findByEmail(request.getEmail())
-                .orElse(null);
+		if (user == null) {
+			return "User Not Found";
+		}
 
-        if(user == null) {
-            return "User Not Found";
-        }
+		if (!user.getOtp().equals(request.getOtp())) {
+			return "Invalid OTP";
+		}
 
-        user.setPassword(
-                passwordEncoder.encode(
-                        request.getNewPassword()));
+		if (LocalDateTime.now().isAfter(user.getOtpExpiry())) {
 
-        user.setOtp(null);
-        user.setOtpExpiry(null);
+			return "OTP Expired";
+		}
 
-        userRepository.save(user);
+		return "OTP Verified";
+	}
 
-        return "Password Reset Successfully";
-    }
+	@Override
+	public String resetPassword(ResetPasswordRequest request) {
+
+		User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+
+		if (user == null) {
+			return "User Not Found";
+		}
+
+		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+		user.setOtp(null);
+		user.setOtpExpiry(null);
+
+		userRepository.save(user);
+
+		return "Password Reset Successfully";
+	}
 }

@@ -10,6 +10,7 @@ import com.alumniportal.entity.User;
 import com.alumniportal.entity.UserProfile;
 import com.alumniportal.repository.UserProfileRepository;
 import com.alumniportal.repository.UserRepository;
+import com.alumniportal.security.JwtUtil;
 
 @Service
 public class UserProfileServiceImpl
@@ -21,33 +22,53 @@ public class UserProfileServiceImpl
     @Autowired
     private UserProfileRepository userProfileRepository;
 
+    @Autowired
+    private JwtUtil jwtUtil;
     
     @Override
     public UserProfile createProfile(
+            User user,
             UserProfileRequest request) {
 
-        User user = userRepository.findById(
-                request.getUserId()).orElse(null);
-
-        if (user == null) {
-            return null;
-        }
-
-        UserProfile profile = new UserProfile();
+        UserProfile profile =
+                new UserProfile();
 
         profile.setUser(user);
-        profile.setAboutMe(request.getAboutMe());
-        profile.setCompany(request.getCompany());
-        profile.setDesignation(request.getDesignation());
-        profile.setIndustry(request.getIndustry());
-        profile.setGraduationYear(request.getGraduationYear());
-        profile.setLinkedinUrl(request.getLinkedinUrl());
-        profile.setGithubUrl(request.getGithubUrl());
-        profile.setResumeUrl(request.getResumeUrl());
+
+        profile.setAboutMe(
+                request.getAboutMe());
+
+        profile.setCompany(
+                request.getCompany());
+
+        profile.setDesignation(
+                request.getDesignation());
+
+        profile.setIndustry(
+                request.getIndustry());
+
+        profile.setGraduationYear(
+                request.getGraduationYear());
+
+        profile.setLinkedinUrl(
+                request.getLinkedinUrl());
+
+        profile.setGithubUrl(
+                request.getGithubUrl());
+
+        profile.setResumeUrl(
+                request.getResumeUrl());
+
         profile.setProfilePicture(
                 request.getProfilePicture());
 
         return userProfileRepository.save(profile);
+    }
+    
+    @Override
+    public List<UserProfile> getAllProfiles() {
+
+        return userProfileRepository.findAll();
     }
 
     @Override
@@ -121,5 +142,25 @@ public class UserProfileServiceImpl
     public List<UserProfile> searchByGraduationYear(Integer year) {
         return userProfileRepository
                 .findByGraduationYear(year);
+    }
+    
+    @Override
+    public String deleteProfile(
+            String authHeader) {
+
+        String token =
+                authHeader.substring(7);
+
+        String email =
+                jwtUtil.extractUsername(token);
+
+        User user =
+                userRepository
+                .findByEmail(email)
+                .orElseThrow();
+
+        userRepository.delete(user);
+
+        return "Profile Deleted Successfully";
     }
 }

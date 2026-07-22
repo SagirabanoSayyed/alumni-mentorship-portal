@@ -2,7 +2,7 @@ package com.alumniportal.dto;
 
 public class UserProfileRequest {
 	
-	    private Long userId;
+	    //private Long userId;
 	    
 	    private String aboutMe;
 
@@ -22,14 +22,7 @@ public class UserProfileRequest {
 
 	    private String profilePicture;
 
-	    public Long getUserId() {
-			return userId;
-		}
-
-		public void setUserId(Long userId) {
-			this.userId = userId;
-		}
-
+	   
 		public String getAboutMe() {
 			return aboutMe;
 		}

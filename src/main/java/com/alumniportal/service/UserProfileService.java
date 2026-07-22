@@ -3,11 +3,14 @@ package com.alumniportal.service;
 import java.util.List;
 
 import com.alumniportal.dto.UserProfileRequest;
+import com.alumniportal.entity.User;
 import com.alumniportal.entity.UserProfile;
 
 public interface UserProfileService {
 
-    UserProfile createProfile(UserProfileRequest request);
+	UserProfile createProfile(
+	        User user,
+	        UserProfileRequest request);
 
     UserProfile getProfile(Long userId);
 
@@ -23,4 +26,8 @@ public interface UserProfileService {
     List<UserProfile> searchByIndustry(String industry);
 
     List<UserProfile> searchByGraduationYear(Integer year);
+    
+    List<UserProfile> getAllProfiles();
+    String deleteProfile(
+            String authHeader);
 }
