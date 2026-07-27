@@ -1,46 +1,72 @@
 package com.alumniportal.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.alumniportal.dto.AdminDashboardDto;
 import com.alumniportal.dto.DashboardResponse;
-import com.alumniportal.entity.User;
-import com.alumniportal.repository.UserRepository;
+import com.alumniportal.dto.MentorDashboardResponse;
+import com.alumniportal.dto.StudentDashboardDto;
 import com.alumniportal.security.JwtUtil;
+import com.alumniportal.service.DashboardService;
 
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
 
     @Autowired
-    private UserRepository userRepository;
+    private DashboardService dashboardService;
 
     @Autowired
     private JwtUtil jwtUtil;
 
     @GetMapping
     public DashboardResponse getDashboard(
-            @RequestHeader("Authorization")
-            String authHeader) {
-    	 System.out.println("AUTH HEADER = " + authHeader);
-        String token =
-                authHeader.substring(7);
+            @RequestHeader("Authorization") String authHeader) {
 
-        String email =
-                jwtUtil.extractUsername(token);
+        String token = authHeader.substring(7);
 
-        User user =
-                userRepository
-                .findByEmail(email)
-                .orElseThrow();
+        String email = jwtUtil.extractUsername(token);
 
-        return new DashboardResponse(
-                user.getFullName(),
-                user.getEmail(),
-                user.getRole().toString()
-        );
+        return dashboardService.getDashboard(email);
+    }
+    
+    @GetMapping("/student")
+    public StudentDashboardDto getStudentDashboard(
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+
+        String email = jwtUtil.extractUsername(token);
+
+        return dashboardService.getStudentDashboard(email);
+    }
+    
+    @GetMapping("/mentor")
+    public MentorDashboardResponse getMentorDashboard(
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+
+        String email = jwtUtil.extractUsername(token);
+
+        return dashboardService.getMentorDashboard(email);
+    }
+    
+    @GetMapping("/alumni")
+    public MentorDashboardResponse getAlumniDashboard(
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+
+        String email = jwtUtil.extractUsername(token);
+
+        return dashboardService.getAlumniDashboard(email);
+    }
+    
+    @GetMapping("/admin")
+    public AdminDashboardDto getAdminDashboard() {
+
+        return dashboardService.getAdminDashboard();
     }
 }

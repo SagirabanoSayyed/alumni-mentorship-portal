@@ -1,278 +1,588 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import AnalyticsChart from "../components/AnalyticsChart";
+
+import {
+    FaUsers,
+    FaHandshake,
+    FaCalendarAlt,
+    FaStar,
+    FaChartLine,
+    FaUserGraduate,
+    FaPlusCircle,
+    FaSearch,
+    FaUser,
+    FaClipboardList
+} from "react-icons/fa";
+
 import "../styles/Dashboard.css";
 import Sidebar from "../components/Sidebar";
-import {
-  FaHome,
-  FaUser,
-  FaUsers,
-  FaHandshake,
-  FaCalendarAlt,
-  FaSignOutAlt
-} from "react-icons/fa";
 
 function DashboardPage() {
 
-    const [user, setUser] = useState(null);
-
-const [stats, setStats] = useState({
-    totalRequests: 0,
-    acceptedRequests: 0,
-    upcomingSessions: 0,
-    completedSessions: 0
-});
-
     const navigate = useNavigate();
 
-    useEffect(() => {
+    const [user, setUser] = useState(null);
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-        const token = localStorage.getItem("token");
-    
-        console.log("TOKEN =", token);
-    
-        axios.get(
-            "http://localhost:8080/dashboard",
-            {
+    useEffect(() => {
+        loadDashboard();
+    }, []);
+
+    const loadDashboard = async () => {
+
+        try {
+
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                navigate("/");
+                return;
+            }
+
+            const config = {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
-            }
-        )
-        .then(response => {
-    
-            setUser(response.data);
-    
-            return axios.get(
-                "http://localhost:8080/dashboard/student",
-                {
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`
-                    }
-                }
+            };
+
+            const dashboardResponse = await axios.get(
+                "http://localhost:8080/dashboard",
+                config
             );
-    
-        })
-        .then(response => {
-    
-            setStats(response.data);
-    
-        })
-        .catch(error => {
-    
-            console.log(error);
-    
-        });
-    
-    }, []);
+
+            setUser(dashboardResponse.data);
+
+            let statsResponse = null;
+
+            switch (dashboardResponse.data.role) {
+
+                case "STUDENT":
+
+                    statsResponse = await axios.get(
+                        "http://localhost:8080/dashboard/student",
+                        config
+                    );
+
+                    break;
+
+                case "MENTOR":
+
+                    statsResponse = await axios.get(
+                        "http://localhost:8080/dashboard/mentor",
+                        config
+                    );
+
+                    break;
+
+                case "ALUMNI":
+
+                    statsResponse = await axios.get(
+                        "http://localhost:8080/dashboard/alumni",
+                        config
+                    );
+
+                    break;
+
+                case "ADMIN":
+
+                    statsResponse = await axios.get(
+                        "http://localhost:8080/dashboard/admin",
+                        config
+                    );
+
+                    break;
+
+                default:
+
+                    statsResponse = null;
+            }
+
+            if (statsResponse) {
+                setStats(statsResponse.data);
+            }
+
+        }
+        catch (error) {
+
+            console.error(error);
+
+            if (
+                error.response?.status === 401 ||
+                error.response?.status === 403
+            ) {
+
+                localStorage.removeItem("token");
+                navigate("/");
+
+            }
+
+        }
+        finally {
+
+            setLoading(false);
+
+        }
+
+    };
 
     const logout = () => {
 
         localStorage.removeItem("token");
-
         navigate("/");
+
     };
 
-    if (!user) {
-        return <h2>Loading...</h2>;
+    if (loading) {
+
+        return (
+            <div className="text-center mt-5">
+                <h3>Loading Dashboard...</h3>
+            </div>
+        );
+
     }
 
+    if (!user) {
+
+        return (
+            <div className="text-center mt-5">
+                <h3>Unable to load dashboard.</h3>
+            </div>
+        );
+
+    }
+
+    const studentCards = stats ? [
+
+        {
+            title: "Total Requests",
+            value: stats.totalRequests,
+            icon: <FaHandshake />,
+            color: "blue"
+        },
+
+        {
+            title: "Pending Requests",
+            value: stats.pendingRequests,
+            icon: <FaClipboardList />,
+            color: "orange"
+        },
+
+        {
+            title: "Accepted Requests",
+            value: stats.acceptedRequests,
+            icon: <FaUsers />,
+            color: "green"
+        },
+
+        {
+            title: "Upcoming Sessions",
+            value: stats.upcomingSessions,
+            icon: <FaCalendarAlt />,
+            color: "purple"
+        },
+
+        {
+            title: "Completed Sessions",
+            value: stats.completedSessions,
+            icon: <FaChartLine />,
+            color: "cyan"
+        }
+
+    ] : [];
+
+    const mentorCards = stats ? [
+
+        {
+            title: "Assigned Students",
+            value: stats.assignedStudents,
+            icon: <FaUserGraduate />,
+            color: "blue"
+        },
+
+        {
+            title: "Pending Requests",
+            value: stats.pendingRequests,
+            icon: <FaClipboardList />,
+            color: "orange"
+        },
+
+        {
+            title: "Accepted Requests",
+            value: stats.acceptedRequests,
+            icon: <FaHandshake />,
+            color: "green"
+        },
+
+        {
+            title: "Upcoming Sessions",
+            value: stats.upcomingSessions,
+            icon: <FaCalendarAlt />,
+            color: "purple"
+        },
+
+        {
+            title: "Completed Sessions",
+            value: stats.completedSessions,
+            icon: <FaChartLine />,
+            color: "cyan"
+        },
+
+        {
+            title: "Average Rating",
+            value: Number(stats.averageRating).toFixed(1),
+            icon: <FaStar />,
+            color: "red"
+        }
+
+    ] : [];
+
+    const cards =
+        user.role === "STUDENT"
+            ? studentCards
+            : mentorCards;
+
+    const quickActions = [];
+
+    if (user.role === "STUDENT") {
+
+        quickActions.push(
+
+            {
+                title: "Find Alumni",
+                icon: <FaSearch />,
+                action: () => navigate("/directory")
+            },
+
+            {
+                title: "My Requests",
+                icon: <FaHandshake />,
+                action: () => navigate("/my-requests")
+            },
+
+            {
+                title: "Sessions",
+                icon: <FaCalendarAlt />,
+                action: () => navigate("/sessions")
+            }
+
+        );
+
+    }
+
+    if (
+        user.role === "MENTOR" ||
+        user.role === "ALUMNI"
+    ) {
+
+        quickActions.push(
+
+            {
+                title: "Students",
+                icon: <FaUsers />,
+                action: () => navigate("/assigned-students")
+            },
+
+            {
+                title: "Schedule",
+                icon: <FaPlusCircle />,
+                action: () => navigate("/create-session")
+            },
+
+            {
+                title: "Requests",
+                icon: <FaHandshake />,
+                action: () => navigate("/mentor-requests")
+            }
+
+        );
+
+    }
+
+    if (user.role === "ADMIN") {
+
+        quickActions.push(
+
+            {
+                title: "Users",
+                icon: <FaUsers />,
+                action: () => navigate("/users")
+            },
+
+            {
+                title: "Mentors",
+                icon: <FaUserGraduate />,
+                action: () => navigate("/mentors")
+            },
+
+            {
+                title: "Profile",
+                icon: <FaUser />,
+                action: () => navigate("/profile")
+            }
+
+        );
+
+    }
     return (
-    <>
-       
+    <div className="dashboard-container">
+
         <Sidebar role={user.role} />
 
-        <div className="dashboard-container">
+        <div className="dashboard-content">
 
-            <div
-                className="card border-0 shadow-lg mb-4"
-                style={{
-                    borderRadius: "25px",
-                    overflow: "hidden"
-                }}
-            >
+            {/* Welcome Banner */}
 
-                <div
-                    style={{
-                        background:
-                            "linear-gradient(135deg,#2563eb,#7c3aed)",
-                        height: "120px"
-                    }}
-                />
+            <div className="dashboard-banner">
 
-                <div
-                    style={{
-                        padding: "30px"
-                    }}
-                >
+                <div>
 
-                    <h1
-                        style={{
-                            fontWeight: "700"
-                        }}
-                    >
+                    <h1>
                         Welcome Back,
-                        {" "}
-                        {user.fullName}
-                        {" "}
-                        👋
+                        <br />
+                        {user.fullName} 👋
                     </h1>
 
-                    <p
-                        className="text-muted fs-5"
-                    >
-                        Manage your mentorship journey,
-                        sessions and professional growth.
+                    <h5>{user.role} Dashboard</h5>
+
+                    <p>
+                        {user.role === "STUDENT" &&
+                            "Connect with experienced alumni and accelerate your career."}
+
+                        {user.role === "MENTOR" &&
+                            "Guide students, manage mentoring sessions and inspire future professionals."}
+
+                        {user.role === "ALUMNI" &&
+                            "Support students and contribute back to your alumni community."}
+
+                        {user.role === "ADMIN" &&
+                            "Manage users, reports and monitor the entire Alumni Portal."}
                     </p>
 
-                    <span
-                        className="badge bg-primary p-2"
-                    >
-                        {user.role}
-                    </span>
+                </div>
+
+                <div className="banner-avatar">
+
+                    {user.fullName.charAt(0).toUpperCase()}
 
                 </div>
 
             </div>
 
-            <div className="row g-4 mb-4">
+            {/* Statistics */}
 
-                <div className="col-md-3">
+            <div className="stats-grid">
+
+                {cards.map((card, index) => (
 
                     <div
-                        className="card border-0 shadow-sm h-100"
-                        style={{
-                            borderRadius: "20px"
-                        }}
+                        className="stats-card"
+                        key={index}
                     >
 
-                        <div className="card-body text-center">
+                        <div className="stats-header">
 
-                            <div
-                                style={{
-                                    fontSize: "40px"
-                                }}
-                            >
-                                📨
+                            <div>
+
+                                <div className="stats-title">
+
+                                    {card.title}
+
+                                </div>
+
+                                <div className="stats-value">
+
+                                    {card.value}
+
+                                </div>
+
                             </div>
 
-                            <h2
-                                className="text-primary fw-bold"
-                            >
-                                {stats.totalRequests}
-                            </h2>
+                            <div className={`stats-icon ${card.color}`}>
 
-                            <p className="text-muted">
-                                Requests Sent
-                            </p>
+                                {card.icon}
+
+                            </div>
 
                         </div>
 
                     </div>
 
+                ))}
+
+            </div>
+
+            {/* Bottom Row */}
+
+            <div className="dashboard-row">
+
+                {/* Quick Actions */}
+
+                <div className="dashboard-panel">
+
+                    <h3>
+
+                        Quick Actions
+
+                    </h3>
+
+                    <div className="action-grid">
+
+                        {quickActions.map((item, index) => (
+
+                            <button
+                                key={index}
+                                className="action-btn"
+                                onClick={item.action}
+                            >
+
+                                {item.icon}
+
+                                <span>
+
+                                    {item.title}
+
+                                </span>
+
+                            </button>
+
+                        ))}
+
+                    </div>
+
                 </div>
 
-                <div className="col-md-3">
+                {/* Progress */}
 
-                    <div
-                        className="card border-0 shadow-sm h-100"
-                        style={{
-                            borderRadius: "20px"
-                        }}
-                    >
+                <div className="dashboard-panel">
 
-                        <div className="card-body text-center">
+                    <h3>
 
-                            <div
-                                style={{
-                                    fontSize: "40px"
-                                }}
-                            >
-                                ✅
-                            </div>
+                        Progress
 
-                            <h2
-                                className="text-success fw-bold"
-                            >
-                                {stats.acceptedRequests}
-                            </h2>
+                    </h3>
 
-                            <p className="text-muted">
+                    {user.role === "STUDENT" && (
+
+                        <>
+
+                            <div className="progress-label">
+
                                 Accepted Requests
-                            </p>
 
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div className="col-md-3">
-
-                    <div
-                        className="card border-0 shadow-sm h-100"
-                        style={{
-                            borderRadius: "20px"
-                        }}
-                    >
-
-                        <div className="card-body text-center">
-
-                            <div
-                                style={{
-                                    fontSize: "40px"
-                                }}
-                            >
-                                📅
                             </div>
 
-                            <h2
-                                className="text-warning fw-bold"
-                            >
-                                {stats.upcomingSessions}
-                            </h2>
+                            <div className="progress">
 
-                            <p className="text-muted">
-                                Upcoming Sessions
-                            </p>
+                                <div
+                                    className="progress-bar bg-success"
+                                    style={{
+                                        width:
+                                            `${stats.totalRequests === 0
+                                                ? 0
+                                                : (stats.acceptedRequests / stats.totalRequests) * 100
+                                            }%`
+                                    }}
+                                />
 
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div className="col-md-3">
-
-                    <div
-                        className="card border-0 shadow-sm h-100"
-                        style={{
-                            borderRadius: "20px"
-                        }}
-                    >
-
-                        <div className="card-body text-center">
-
-                            <div
-                                style={{
-                                    fontSize: "40px"
-                                }}
-                            >
-                                ⭐
                             </div>
 
-                            <h2
-                                className="text-info fw-bold"
-                            >
-                                {stats.completedSessions}
-                            </h2>
+                            <p>
 
-                            <p className="text-muted">
+                                {stats.acceptedRequests}
+
+                                {" / "}
+
+                                {stats.totalRequests}
+
+                            </p>
+
+                        </>
+
+                    )}
+
+                    {(user.role === "MENTOR" ||
+                        user.role === "ALUMNI") && (
+
+                        <>
+
+                            <div className="progress-label">
+
                                 Completed Sessions
+
+                            </div>
+
+                            <div className="progress">
+
+                                <div
+                                    className="progress-bar bg-primary"
+                                    style={{
+                                        width:
+                                            `${(stats.completedSessions /
+                                                Math.max(
+                                                    1,
+                                                    stats.completedSessions +
+                                                    stats.upcomingSessions
+                                                )) * 100}%`
+                                    }}
+                                />
+
+                            </div>
+
+                            <p>
+
+                                {stats.completedSessions}
+
+                                {" Completed"}
+
                             </p>
 
-                        </div>
+                        </>
+
+                    )}
+
+                    {user.role === "ADMIN" && (
+
+                        <p>
+
+                            Admin analytics will appear here.
+
+                        </p>
+
+                    )}
+
+                </div>
+
+            </div>
+
+            {/* Schedule */}
+
+            <div className="dashboard-panel schedule-panel">
+
+                <h3>
+
+                    Today's Schedule
+
+                </h3>
+
+                <div className="schedule-item">
+
+                    <div>
+
+                        <strong>
+
+                            No sessions scheduled today.
+
+                        </strong>
+
+                        <p>
+
+                            Your upcoming sessions will appear here.
+
+                        </p>
 
                     </div>
 
@@ -280,110 +590,33 @@ const [stats, setStats] = useState({
 
             </div>
 
-            <div
-                className="card border-0 shadow-sm mb-4"
-                style={{
-                    borderRadius: "20px"
-                }}
-            >
+            {/* Analytics */}
 
-                <div className="card-body">
+<div className="dashboard-panel mt-4">
 
-                    <h3
-                        className="fw-bold mb-4"
-                    >
-                        🚀 Quick Overview
-                    </h3>
+    <h3 className="mb-4">
 
-                    <div className="row">
+        Analytics
 
-                        <div className="col-md-6">
+    </h3>
 
-                            <div
-                                className="alert alert-primary"
-                            >
-                                Total mentorship requests:
-                                {" "}
-                                <strong>
-                                    {stats.totalRequests}
-                                </strong>
-                            </div>
+    <AnalyticsChart
 
-                        </div>
+        stats={stats}
 
-                        <div className="col-md-6">
+        role={user.role}
 
-                            <div
-                                className="alert alert-success"
-                            >
-                                Accepted requests:
-                                {" "}
-                                <strong>
-                                    {stats.acceptedRequests}
-                                </strong>
-                            </div>
+    />
 
-                        </div>
+</div>
 
-                    </div>
+</div>
 
-                </div>
+</div>
 
-            </div>
-
-            <div
-                className="card border-0 shadow-sm"
-                style={{
-                    borderRadius: "20px"
-                }}
-            >
-
-                <div className="card-body">
-
-                    <h3
-                        className="fw-bold mb-4"
-                    >
-                        📌 Recent Activity
-                    </h3>
-
-                    <ul
-                        className="list-group list-group-flush"
-                    >
-
-                        <li
-                            className="list-group-item"
-                        >
-                            📨 Mentorship request sent
-                        </li>
-
-                        <li
-                            className="list-group-item"
-                        >
-                            ✅ Request accepted
-                        </li>
-
-                        <li
-                            className="list-group-item"
-                        >
-                            📅 Session scheduled
-                        </li>
-
-                        <li
-                            className="list-group-item"
-                        >
-                            ⭐ Feedback submitted
-                        </li>
-
-                    </ul>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </>
+      
 );
-            }
+
+}
 
 export default DashboardPage;

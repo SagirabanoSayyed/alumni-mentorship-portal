@@ -28,4 +28,16 @@ public interface MentorshipRequestRepository
             Long userId,
             String status);
     
+    long countByMentorUserId(Long mentorId);
+
+    long countByMentorUserIdAndStatus(
+            Long mentorId,
+            String status);
+
+    List<MentorshipRequest>
+    findByMentorUserIdAndStatus(
+            Long mentorId,
+            String status);
+    
+    
 }

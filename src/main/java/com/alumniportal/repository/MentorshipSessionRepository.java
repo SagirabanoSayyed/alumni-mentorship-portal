@@ -23,4 +23,16 @@ public interface MentorshipSessionRepository
             Long studentId,
             Long mentorId,
             String status);
+    
+    long countByMentorUserId(Long mentorId);
+
+    long countByMentorUserIdAndStatus(
+            Long mentorId,
+            String status);
+
+    List<MentorshipSession>
+    findByMentorUserIdAndStatus(
+            Long mentorId,
+            String status);
+    
 }
