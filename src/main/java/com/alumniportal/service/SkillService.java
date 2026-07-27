@@ -9,7 +9,7 @@ public interface SkillService {
 
     SkillResponse addSkill(SkillRequest request);
 
-    List<SkillResponse> getSkillsByUser(Long userId);
+    List<SkillResponse> getMySkills();
 
     List<SkillResponse> searchBySkill(String skillName);
 

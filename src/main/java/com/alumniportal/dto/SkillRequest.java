@@ -1,15 +1,11 @@
 package com.alumniportal.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class SkillRequest {
 
-    
-
+    @NotBlank(message = "Skill name is required")
     private String skillName;
-
-    public SkillRequest() {
-    }
-
-   
 
     public String getSkillName() {
         return skillName;

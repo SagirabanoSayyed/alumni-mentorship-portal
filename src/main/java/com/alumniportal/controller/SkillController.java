@@ -24,11 +24,10 @@ public class SkillController {
         return skillService.addSkill(request);
     }
 
-    // Get all skills of a user
-    @GetMapping("/user/{userId}")
-    public List<SkillResponse> getSkillsByUser(@PathVariable Long userId) {
+    @GetMapping("/my-skills")
+    public List<SkillResponse> getMySkills() {
 
-        return skillService.getSkillsByUser(userId);
+        return skillService.getMySkills();
     }
 
     // Search by skill name

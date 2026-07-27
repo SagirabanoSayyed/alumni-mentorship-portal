@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.alumniportal.dto.SkillRequest;
@@ -15,10 +17,6 @@ import com.alumniportal.entity.UserSkill;
 import com.alumniportal.repository.SkillRepository;
 import com.alumniportal.repository.UserRepository;
 import com.alumniportal.repository.UserSkillRepository;
-import com.alumniportal.service.SkillService;
-import java.util.Optional;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
 public class SkillServiceImpl implements SkillService {
@@ -32,19 +30,21 @@ public class SkillServiceImpl implements SkillService {
     @Autowired
     private UserSkillRepository userSkillRepository;
 
-    @Override
-    public SkillResponse addSkill(SkillRequest request) {
+    private User getCurrentUser() {
 
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
         String email = authentication.getName();
 
-        User user = userRepository.findByEmail(email).orElse(null);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 
-        if (user == null) {
-            return null;
-        }
+    @Override
+    public SkillResponse addSkill(SkillRequest request) {
+
+        User user = getCurrentUser();
 
         String skillName = request.getSkillName().trim();
 
@@ -69,7 +69,7 @@ public class SkillServiceImpl implements SkillService {
                 userSkillRepository.findByUserUserId(user.getUserId());
 
         if (userSkills.size() >= 10) {
-            return null;
+            throw new RuntimeException("Maximum 10 skills allowed");
         }
 
         boolean exists =
@@ -78,7 +78,7 @@ public class SkillServiceImpl implements SkillService {
                         skill.getSkillId());
 
         if (exists) {
-            return null;
+            throw new RuntimeException("Skill already added");
         }
 
         UserSkill userSkill = new UserSkill();
@@ -86,32 +86,71 @@ public class SkillServiceImpl implements SkillService {
         userSkill.setUser(user);
         userSkill.setSkill(skill);
 
-        userSkillRepository.save(userSkill);
+        // Save and get the generated ID
+        userSkill = userSkillRepository.save(userSkill);
 
         SkillResponse response = new SkillResponse();
 
+        response.setId(userSkill.getId());
         response.setSkillId(skill.getSkillId());
         response.setSkillName(skill.getSkillName());
 
         return response;
+
+      
     }
 
-	@Override
-	public void deleteSkill(Long userSkillId) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public List<SkillResponse> getMySkills() {
 
-	@Override
-	public List<SkillResponse> getSkillsByUser(Long userId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        User user = getCurrentUser();
 
-	@Override
-	public List<SkillResponse> searchBySkill(String skillName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        List<UserSkill> userSkills =
+                userSkillRepository.findByUserUserId(user.getUserId());
 
+        return userSkills.stream().map(userSkill -> {
+
+            SkillResponse response = new SkillResponse();
+            response.setId(userSkill.getId());
+            response.setSkillId(userSkill.getSkill().getSkillId());
+            response.setSkillName(userSkill.getSkill().getSkillName());
+
+            return response;
+
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SkillResponse> searchBySkill(String skillName) {
+
+        List<UserSkill> userSkills =
+                userSkillRepository
+                        .findBySkillSkillNameContainingIgnoreCase(skillName);
+
+        return userSkills.stream().map(userSkill -> {
+
+            SkillResponse response = new SkillResponse();
+            response.setId(userSkill.getId());
+            response.setSkillId(userSkill.getSkill().getSkillId());
+            response.setSkillName(userSkill.getSkill().getSkillName());
+            return response;
+
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteSkill(Long id) {
+
+        User user = getCurrentUser();
+
+        UserSkill userSkill = userSkillRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Skill not found"));
+
+        if (!userSkill.getUser().getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("You are not authorized to delete this skill");
+        }
+
+        userSkillRepository.delete(userSkill);
+    }
 }

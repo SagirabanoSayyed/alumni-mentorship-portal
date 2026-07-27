@@ -3,80 +3,114 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 
 function SkillsPage() {
+    
+   
 
-    const [userId, setUserId] = useState("");
+    const token = localStorage.getItem("token");
     const [skillName, setSkillName] = useState("");
     const [skills, setSkills] = useState([]);
+    
 
-    const loadSkills = () => {
+   const loadSkills = () => {
 
-        if (!userId) return;
+    axios.get(
+        "http://localhost:8080/skills/my-skills",
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    )
+    .then(response => {
 
-        axios.get(`http://localhost:8080/skills/user/${userId}`)
-            .then(response => {
+        setSkills(response.data);
 
-                setSkills(response.data);
+    })
+    .catch(error => {
 
-            })
-            .catch(error => {
+        console.log(error);
 
-                console.log(error);
+    });
 
-            });
-
-    };
+};
 
     const addSkill = () => {
 
-        if (!userId || !skillName) {
+    if (!skillName) {
 
-            alert("Please enter User ID and Skill Name");
-            return;
+        alert("Please enter Skill Name");
+        return;
 
-        }
+    }
 
-        axios.post("http://localhost:8080/skills/add", {
-
-            userId: userId,
+    axios.post(
+        "http://localhost:8080/skills/add",
+        {
             skillName: skillName
+        },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    )
+    .then(() => {
 
-        })
-        .then(response => {
+        alert("Skill Added Successfully");
 
-            alert("Skill Added Successfully");
+        setSkillName("");
 
-            setSkillName("");
+        loadSkills();
 
-            loadSkills();
+    })
+    .catch(error => {
 
-        })
-        .catch(error => {
+        console.log(error);
 
-            console.log(error);
+        alert(
+            error.response?.data ||
+            "Unable to add skill"
+        );
 
-            alert("Unable to add skill");
+    });
 
-        });
-
-    };
+};
 
     const deleteSkill = (id) => {
 
-        axios.delete(`http://localhost:8080/skills/${id}`)
-            .then(() => {
+    axios.delete(
+        `http://localhost:8080/skills/${id}`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    )
+    .then(() => {
 
-                alert("Skill Deleted");
+        alert("Skill Deleted");
 
-                loadSkills();
+        loadSkills();
 
-            })
-            .catch(error => {
+    })
+    .catch(error => {
 
-                console.log(error);
+        console.log(error);
 
-            });
+    });
 
-    };
+};
+
+ useEffect(() => {
+
+    if (!token) {
+        alert("Please login first");
+        return;
+    }
+
+    loadSkills();
+
+}, []);
 
     return (
 
@@ -96,19 +130,7 @@ function SkillsPage() {
 
                     <div className="row">
 
-                        <div className="col-md-3">
-
-                            <input
-                                type="number"
-                                className="form-control"
-                                placeholder="User ID"
-                                value={userId}
-                                onChange={(e)=>setUserId(e.target.value)}
-                            />
-
-                        </div>
-
-                        <div className="col-md-5">
+                       <div className="col-md-8">
 
                             <input
                                 type="text"
@@ -174,7 +196,7 @@ function SkillsPage() {
 
                             skills.map(skill => (
 
-                                <tr key={skill.skillId}>
+                                <tr key={skill.id}>
 
                                     <td>{skill.skillId}</td>
 
@@ -185,8 +207,8 @@ function SkillsPage() {
                                         <button
                                             className="btn btn-danger btn-sm"
                                             onClick={() =>
-                                                deleteSkill(skill.skillId)
-                                            }
+    deleteSkill(skill.id)
+}
                                         >
 
                                             Delete
