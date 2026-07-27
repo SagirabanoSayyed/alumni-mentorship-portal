@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.alumniportal.dto.DirectoryProfileResponse;
 import com.alumniportal.dto.UserProfileRequest;
 import com.alumniportal.entity.User;
 import com.alumniportal.entity.UserProfile;
@@ -29,13 +30,13 @@ public class UserProfileController {
     
 
     @GetMapping("/all")
-    public List<UserProfile> getAllProfiles() {
+    public List<DirectoryProfileResponse> getAllProfiles() {
 
         return userProfileService.getAllProfiles();
     }
 
     @GetMapping("/search/skill/{skill}")
-    public List<UserProfile> searchBySkill(
+    public List<DirectoryProfileResponse> searchBySkill(
             @PathVariable String skill) {
 
         return userProfileService.searchBySkill(skill);
@@ -89,28 +90,28 @@ public class UserProfileController {
     }
     
     @GetMapping("/search/name/{name}")
-    public List<UserProfile> searchByName(
+    public List<DirectoryProfileResponse> searchByName(
             @PathVariable String name) {
 
         return userProfileService.searchByName(name);
     }
     
     @GetMapping("/search/company/{company}")
-    public List<UserProfile> searchByCompany(
+    public List<DirectoryProfileResponse> searchByCompany(
             @PathVariable String company) {
 
         return userProfileService.searchByCompany(company);
     }
     
     @GetMapping("/search/industry/{industry}")
-    public List<UserProfile> searchByIndustry(
+    public List<DirectoryProfileResponse> searchByIndustry(
             @PathVariable String industry) {
 
         return userProfileService.searchByIndustry(industry);
     }
     
     @GetMapping("/search/year/{year}")
-    public List<UserProfile> searchByGraduationYear(
+    public List<DirectoryProfileResponse> searchByGraduationYear(
             @PathVariable Integer year) {
 
         return userProfileService.searchByGraduationYear(year);

@@ -2,6 +2,7 @@ package com.alumniportal.service;
 
 import java.util.List;
 
+import com.alumniportal.dto.DirectoryProfileResponse;
 import com.alumniportal.dto.UserProfileRequest;
 import com.alumniportal.entity.User;
 import com.alumniportal.entity.UserProfile;
@@ -19,17 +20,17 @@ public interface UserProfileService {
     
     void deleteProfile(Long userId);
     
-    List<UserProfile> searchByName(String name);
-    
-    List<UserProfile> searchByCompany(String company);
+    List<DirectoryProfileResponse> getAllProfiles();
 
-    List<UserProfile> searchByIndustry(String industry);
+    List<DirectoryProfileResponse> searchBySkill(String skillName);
 
-    List<UserProfile> searchByGraduationYear(Integer year);
-    
-    List<UserProfile> getAllProfiles();
-    String deleteProfile(
-            String authHeader);
-    
-    List<UserProfile> searchBySkill(String skillName);
+    List<DirectoryProfileResponse> searchByName(String name);
+
+    List<DirectoryProfileResponse> searchByCompany(String company);
+
+    List<DirectoryProfileResponse> searchByIndustry(String industry);
+
+    List<DirectoryProfileResponse> searchByGraduationYear(Integer year);
+
+	String deleteProfile(String authHeader);
 }

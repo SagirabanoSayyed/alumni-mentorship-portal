@@ -29,18 +29,15 @@ function DirectoryPage() {
         )
         .then(response => {
 
-            const filteredProfiles = response.data.filter(
-                profile =>
-                    profile.user &&
-                    (
-                        profile.user.role === "ALUMNI" ||
-                        profile.user.role === "MENTOR"
-                    )
-            );
+    const filteredProfiles = response.data.filter(
+        profile =>
+            profile.role === "ALUMNI" ||
+            profile.role === "MENTOR"
+    );
 
-            setProfiles(filteredProfiles);
+    setProfiles(filteredProfiles);
 
-        })
+})
         .catch(error => console.log(error));
 
     };
@@ -91,18 +88,15 @@ function DirectoryPage() {
         )
         .then(response => {
 
-            const filteredProfiles = response.data.filter(
-                profile =>
-                    profile.user &&
-                    (
-                        profile.user.role === "ALUMNI" ||
-                        profile.user.role === "MENTOR"
-                    )
-            );
+    const filteredProfiles = response.data.filter(
+        profile =>
+            profile.role === "ALUMNI" ||
+            profile.role === "MENTOR"
+    );
 
-            setProfiles(filteredProfiles);
+    setProfiles(filteredProfiles);
 
-        })
+})
         .catch(error => console.log(error));
 
     };
@@ -319,17 +313,17 @@ function DirectoryPage() {
                             />
 
                             <h4 className="fw-bold mb-2">
-                                {profile.user?.fullName}
+                                {profile.fullName}
                             </h4>
 
                             <span
                                 className={
-                                    profile.user?.role === "MENTOR"
+                                    profile.role === "MENTOR"
                                         ? "badge bg-success px-3 py-2"
                                         : "badge bg-primary px-3 py-2"
                                 }
                             >
-                                {profile.user?.role}
+                                {profile.role}
                             </span>
 
                         </div>
@@ -380,6 +374,33 @@ function DirectoryPage() {
 
                             </div>
 
+                            <div className="mb-2">
+    <strong>💻 Skills</strong>
+    <br />
+
+    {profile.skills && profile.skills.length > 0 ? (
+
+        profile.skills.map((skill, index) => (
+
+            <span
+                key={index}
+                className="badge rounded-pill bg-info text-dark me-2 mt-2"
+            >
+                {skill}
+            </span>
+
+        ))
+
+    ) : (
+
+        <small className="text-muted">
+            No skills added
+        </small>
+
+    )}
+
+</div>
+
                         </div>
 
                         <div className="mt-auto">
@@ -387,7 +408,7 @@ function DirectoryPage() {
                             <button
     className="btn btn-primary w-100 rounded-pill"
     onClick={() =>
-        navigate(`/directory/profile/${profile.user.userId}`)
+        navigate(`/directory/profile/${profile.userId}`)
     }
 >
     👤 View Professional Profile
