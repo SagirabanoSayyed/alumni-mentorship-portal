@@ -49,6 +49,16 @@ public class SessionFeedbackServiceImpl
                 .findById(dto.getSessionId())
                 .orElseThrow();
 
+        // ✅ Prevent duplicate feedback
+        if (feedbackRepository
+                .findByStudentUserIdAndSessionSessionId(
+                        student.getUserId(),
+                        dto.getSessionId())
+                .isPresent()) {
+
+            return "Feedback Already Submitted";
+        }
+
         SessionFeedback feedback =
                 new SessionFeedback();
 
@@ -61,7 +71,7 @@ public class SessionFeedbackServiceImpl
 
         return "Feedback Submitted Successfully";
     }
-
+    
     @Override
     public List<SessionFeedback>
     getMyFeedbacks(String authHeader) {

@@ -11,6 +11,7 @@ import com.alumniportal.entity.MentorshipSession;
 import com.alumniportal.entity.User;
 import com.alumniportal.repository.MentorshipRequestRepository;
 import com.alumniportal.repository.MentorshipSessionRepository;
+import com.alumniportal.repository.SessionFeedbackRepository;
 import com.alumniportal.repository.UserRepository;
 import com.alumniportal.security.JwtUtil;
 
@@ -29,6 +30,9 @@ public class MentorshipSessionServiceImpl
 
     @Autowired
     private MentorshipSessionRepository sessionRepository;
+    
+    @Autowired
+    private SessionFeedbackRepository feedbackRepository;
 
     @Override
     public String createSession(
@@ -95,8 +99,7 @@ public class MentorshipSessionServiceImpl
     }
 
     @Override
-    public List<MentorshipSession>
-    getStudentSessions(
+    public List<MentorshipSession> getStudentSessions(
             String authHeader) {
 
         String token =
@@ -109,9 +112,24 @@ public class MentorshipSessionServiceImpl
                 userRepository.findByEmail(email)
                 .orElseThrow();
 
-        return sessionRepository
-                .findByStudentUserId(
+        List<MentorshipSession> sessions =
+                sessionRepository.findByStudentUserId(
                         student.getUserId());
+
+        for (MentorshipSession session : sessions) {
+
+            boolean feedbackSubmitted =
+                    feedbackRepository
+                    .findByStudentUserIdAndSessionSessionId(
+                            student.getUserId(),
+                            session.getSessionId())
+                    .isPresent();
+
+            session.setFeedbackSubmitted(
+                    feedbackSubmitted);
+        }
+
+        return sessions;
     }
 
     @Override

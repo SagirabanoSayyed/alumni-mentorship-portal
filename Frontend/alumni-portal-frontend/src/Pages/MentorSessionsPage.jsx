@@ -40,46 +40,61 @@ function MentorSessionsPage() {
 
     const completeSession = (sessionId) => {
 
-        axios.put(
-            `http://localhost:8080/sessions/${sessionId}/complete`
-        )
-        .then(() => {
+    const token = localStorage.getItem("token");
 
-            alert("Session Completed");
+    axios.put(
+        `http://localhost:8080/sessions/${sessionId}/complete`,
+        {},
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    )
+    .then(() => {
 
-            loadSessions();
+        alert("Session Completed");
 
-        })
-        .catch(error => {
+        loadSessions();
 
-            console.log(error);
+    })
+    .catch(error => {
 
-            alert("Failed To Complete Session");
+        console.log(error);
 
-        });
-    };
+        alert("Failed To Complete Session");
+
+    });
+};
 
     const cancelSession = (sessionId) => {
 
-        axios.put(
-            `http://localhost:8080/sessions/${sessionId}/cancel`
-        )
-        .then(() => {
+    const token = localStorage.getItem("token");
 
-            alert("Session Cancelled");
+    axios.put(
+        `http://localhost:8080/sessions/${sessionId}/cancel`,
+        {},
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    )
+    .then(() => {
 
-            loadSessions();
+        alert("Session Cancelled");
 
-        })
-        .catch(error => {
+        loadSessions();
 
-            console.log(error);
+    })
+    .catch(error => {
 
-            alert("Failed To Cancel Session");
+        console.log(error);
 
-        });
-    };
+        alert("Failed To Cancel Session");
 
+    });
+};
     return (
         <>
             <Sidebar />

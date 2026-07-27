@@ -153,20 +153,33 @@ function MySessionsPage() {
 
                                                 </td>
 
-                                                <td>
+                                               <td>
 
     {session.status === "COMPLETED" && (
 
-        <button
-            className="btn btn-warning btn-sm"
-            onClick={() =>
-                navigate(
-                    `/feedback/${session.sessionId}`
-                )
-            }
-        >
-            Give Feedback
-        </button>
+        session.feedbackSubmitted ? (
+
+            <button
+                className="btn btn-success btn-sm"
+                disabled
+            >
+                Feedback Submitted
+            </button>
+
+        ) : (
+
+            <button
+                className="btn btn-warning btn-sm"
+                onClick={() =>
+                    navigate(
+                        `/feedback/${session.sessionId}`
+                    )
+                }
+            >
+                Give Feedback
+            </button>
+
+        )
 
     )}
 

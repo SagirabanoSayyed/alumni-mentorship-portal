@@ -33,6 +33,9 @@ public class MentorshipSession {
 
     private String status;
 
+    @Transient
+    private boolean feedbackSubmitted;
+    
     public MentorshipSession() {
     }
 
@@ -98,5 +101,13 @@ public class MentorshipSession {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+    
+    public boolean isFeedbackSubmitted() {
+        return feedbackSubmitted;
+    }
+
+    public void setFeedbackSubmitted(boolean feedbackSubmitted) {
+        this.feedbackSubmitted = feedbackSubmitted;
     }
 }
