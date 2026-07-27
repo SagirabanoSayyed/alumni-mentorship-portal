@@ -34,6 +34,13 @@ public class UserProfileController {
         return userProfileService.getAllProfiles();
     }
 
+    @GetMapping("/search/skill/{skill}")
+    public List<UserProfile> searchBySkill(
+            @PathVariable String skill) {
+
+        return userProfileService.searchBySkill(skill);
+
+    }
     @PostMapping
     public UserProfile createProfile(
             @RequestHeader("Authorization")

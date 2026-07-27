@@ -20,7 +20,7 @@ public interface UserProfileService {
     void deleteProfile(Long userId);
     
     List<UserProfile> searchByName(String name);
-
+    
     List<UserProfile> searchByCompany(String company);
 
     List<UserProfile> searchByIndustry(String industry);
@@ -30,4 +30,6 @@ public interface UserProfileService {
     List<UserProfile> getAllProfiles();
     String deleteProfile(
             String authHeader);
+    
+    List<UserProfile> searchBySkill(String skillName);
 }

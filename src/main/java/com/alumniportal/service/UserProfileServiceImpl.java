@@ -66,6 +66,12 @@ public class UserProfileServiceImpl
     }
     
     @Override
+    public List<UserProfile> searchBySkill(String skillName) {
+
+        return userProfileRepository.findProfilesBySkill(skillName);
+
+    }
+    @Override
     public List<UserProfile> getAllProfiles() {
 
         return userProfileRepository.findAll();

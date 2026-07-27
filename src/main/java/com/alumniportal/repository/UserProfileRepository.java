@@ -35,5 +35,13 @@ public interface UserProfileRepository
     		        @Param("company") String company,
     		        @Param("industry") String industry,
     		        @Param("year") Integer year);
+    
+    @Query("""
+    		SELECT DISTINCT up
+    		FROM UserProfile up
+    		JOIN UserSkill us ON up.user.userId = us.user.userId
+    		WHERE LOWER(us.skill.skillName) LIKE LOWER(CONCAT('%', :skillName, '%'))
+    		""")
+    		List<UserProfile> findProfilesBySkill(@Param("skillName") String skillName);
 
 }

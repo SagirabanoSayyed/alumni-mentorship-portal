@@ -15,6 +15,7 @@ function DirectoryPage() {
     const [company, setCompany] = useState("");
     const [industry, setIndustry] = useState("");
     const [year, setYear] = useState("");
+    const [skill, setSkill] = useState("");
 
     const loadProfiles = () => {
 
@@ -68,6 +69,11 @@ function DirectoryPage() {
             url = `http://localhost:8080/profile/search/year/${year}`;
 
         }
+        else if (skill.trim() !== "") {
+
+    url = `http://localhost:8080/profile/search/skill/${skill}`;
+
+}
         else {
 
             loadProfiles();
@@ -107,7 +113,7 @@ function DirectoryPage() {
         setCompany("");
         setIndustry("");
         setYear("");
-
+        setSkill("");
         loadProfiles();
 
     };
@@ -146,100 +152,86 @@ function DirectoryPage() {
 
                 </div>
 
-                <div
-                    className="card shadow-sm border-0 mb-4 mx-auto"
-                    style={{
-                        maxWidth: "1350px"
-                    }}
+                <div className="card shadow-sm border-0 mb-4 mx-auto"
+    style={{ maxWidth: "1350px" }}>
+
+    <div className="card-body">
+
+        <div className="row g-3">
+
+            <div className="col-md-4">
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="🔍 Search Name"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+            </div>
+
+            <div className="col-md-4">
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="🏢 Company"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                />
+            </div>
+
+            <div className="col-md-4">
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="🏭 Industry"
+                    value={industry}
+                    onChange={(e) => setIndustry(e.target.value)}
+                />
+            </div>
+
+            <div className="col-md-3">
+                <input
+                    type="number"
+                    className="form-control"
+                    placeholder="🎓 Year"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                />
+            </div>
+
+            <div className="col-md-3">
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="💻 Skill"
+                    value={skill}
+                    onChange={(e) => setSkill(e.target.value)}
+                />
+            </div>
+
+            <div className="col-md-3 d-grid">
+                <button
+                    className="btn btn-primary"
+                    onClick={searchProfiles}
                 >
+                    Search
+                </button>
+            </div>
 
-                    <div className="card-body">
+            <div className="col-md-3 d-grid">
+                <button
+                    className="btn btn-outline-secondary"
+                    onClick={clearFilters}
+                >
+                    Clear Filters
+                </button>
+            </div>
 
-                        <div className="row g-2 align-items-center">
+        </div>
 
-                            <div className="col-xl-3 col-lg-6">
+    </div>
 
-                                <input
-                                    type="text"
-                                    className="form-control form-control-sm"
-                                    placeholder="🔍 Search Name"
-                                    value={search}
-                                    onChange={(e) =>
-                                        setSearch(e.target.value)
-                                    }
-                                />
-
-                            </div>
-
-                            <div className="col-xl-2 col-lg-6">
-
-                                <input
-                                    type="text"
-                                    className="form-control form-control-sm"
-                                    placeholder="🏢 Company"
-                                    value={company}
-                                    onChange={(e) =>
-                                        setCompany(e.target.value)
-                                    }
-                                />
-
-                            </div>
-
-                            <div className="col-xl-2 col-lg-6">
-
-                                <input
-                                    type="text"
-                                    className="form-control form-control-sm"
-                                    placeholder="🏭 Industry"
-                                    value={industry}
-                                    onChange={(e) =>
-                                        setIndustry(e.target.value)
-                                    }
-                                />
-
-                            </div>
-
-                            <div className="col-xl-2 col-lg-6">
-
-                                <input
-                                    type="number"
-                                    className="form-control form-control-sm"
-                                    placeholder="🎓 Year"
-                                    value={year}
-                                    onChange={(e) =>
-                                        setYear(e.target.value)
-                                    }
-                                />
-
-                            </div>
-
-                            <div className="col-xl-1 col-lg-6 d-grid">
-
-                                <button
-                                    className="btn btn-primary btn-sm"
-                                    onClick={searchProfiles}
-                                >
-                                    Search
-                                </button>
-
-                            </div>
-
-                            <div className="col-xl-2 col-lg-6 d-grid">
-
-                                <button
-                                    className="btn btn-outline-secondary btn-sm"
-                                    onClick={clearFilters}
-                                >
-                                    Clear Filters
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
+</div>
 
                 <div className="row">
 
