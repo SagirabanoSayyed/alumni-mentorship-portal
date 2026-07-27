@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 
 function MentorRequestsPage() {
 
+    const token = localStorage.getItem("token");
     const [requests, setRequests] = useState([]);
 
     useEffect(() => {
@@ -37,8 +38,14 @@ function MentorRequestsPage() {
     const acceptRequest = (requestId) => {
 
         axios.put(
-            `http://localhost:8080/request/${requestId}/accept`
-        )
+    `http://localhost:8080/request/${requestId}/accept`,
+    {},
+    {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }
+)
         .then(() => {
 
             alert("Request Accepted");
@@ -56,8 +63,14 @@ function MentorRequestsPage() {
     const rejectRequest = (requestId) => {
 
         axios.put(
-            `http://localhost:8080/request/${requestId}/reject`
-        )
+    `http://localhost:8080/request/${requestId}/reject`,
+    {},
+    {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }
+)
         .then(() => {
 
             alert("Request Rejected");

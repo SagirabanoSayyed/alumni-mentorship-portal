@@ -49,21 +49,29 @@ function ViewProfilePage() {
 
     useEffect(() => {
 
-        axios.get(
-            `http://localhost:8080/profile/${id}`
-        )
-        .then(response => {
+    const token = localStorage.getItem("token");
 
-            setProfile(response.data);
+    axios.get(
+        `http://localhost:8080/profile/${id}`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    )
+    .then(response => {
 
-        })
-        .catch(error => {
+        setProfile(response.data);
 
-            console.log(error);
+    })
+    .catch(error => {
 
-        });
+        console.log(error);
 
-    }, [id]);
+    });
+
+}, [id]);
+
 
     if (!profile) {
         return (
