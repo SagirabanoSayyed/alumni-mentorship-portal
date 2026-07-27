@@ -16,6 +16,9 @@ import com.alumniportal.entity.UserProfile;
 import com.alumniportal.repository.UserProfileRepository;
 import com.alumniportal.repository.UserRepository;
 import com.alumniportal.security.JwtUtil;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -31,6 +34,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private UserProfileRepository userProfileRepository;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
 	@Override
 	public String register(RegisterRequest request) {
 
@@ -70,32 +76,29 @@ public class AuthServiceImpl implements AuthService {
 
 		return "User Registered Successfully";
 	}
-
 	@Override
 	public String login(LoginRequest request) {
-		
-		System.out.println("Email received = "
-	            + request.getEmail());
 
-		User user = userRepository.findByEmail(request.getEmail()).orElse(null);
-		System.out.println("Email received = " + request.getEmail());
-		System.out.println("User found = " + user);
+	    Authentication authentication =
+	            authenticationManager.authenticate(
+	                    new UsernamePasswordAuthenticationToken(
+	                            request.getEmail(),
+	                            request.getPassword()));
 
-		if (user == null) {
-			return "User Not Found";
-		}
+	    if (!authentication.isAuthenticated()) {
+	        return "Invalid Credentials";
+	    }
 
-		if (!user.isActive()) {
-			return "Account Deactivated";
-		}
+	    User user = userRepository
+	            .findByEmail(request.getEmail())
+	            .orElseThrow(() ->
+	                    new RuntimeException("User Not Found"));
 
-		boolean isValid = passwordEncoder.matches(request.getPassword(), user.getPassword());
+	    if (!user.isActive()) {
+	        return "Account Deactivated";
+	    }
 
-		if (!isValid) {
-			return "Invalid Password";
-		}
-
-		return jwtUtil.generateToken(user.getEmail());
+	    return jwtUtil.generateToken(user.getEmail());
 	}
 
 	@Override
