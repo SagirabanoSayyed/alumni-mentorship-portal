@@ -26,6 +26,7 @@ public class UserProfileController {
 
     @Autowired
     private UserRepository userRepository;
+    
 
     @GetMapping("/all")
     public List<UserProfile> getAllProfiles() {
@@ -52,6 +53,7 @@ public class UserProfileController {
                 .createProfile(user, request);
     }
 
+    
     @GetMapping("/{userId}")
     public UserProfile getProfile(
             @PathVariable Long userId) {

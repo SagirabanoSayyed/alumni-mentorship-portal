@@ -10,7 +10,11 @@ function DirectoryPage() {
     const token = localStorage.getItem("token");
 
     const [profiles, setProfiles] = useState([]);
+
     const [search, setSearch] = useState("");
+    const [company, setCompany] = useState("");
+    const [industry, setIndustry] = useState("");
+    const [year, setYear] = useState("");
 
     const loadProfiles = () => {
 
@@ -36,17 +40,35 @@ function DirectoryPage() {
             setProfiles(filteredProfiles);
 
         })
-        .catch(error => {
-
-            console.log(error);
-
-        });
+        .catch(error => console.log(error));
 
     };
 
-    const searchByName = () => {
+    const searchProfiles = () => {
 
-        if (!search.trim()) {
+        let url = "";
+
+        if (search.trim() !== "") {
+
+            url = `http://localhost:8080/profile/search/name/${search}`;
+
+        }
+        else if (company.trim() !== "") {
+
+            url = `http://localhost:8080/profile/search/company/${company}`;
+
+        }
+        else if (industry.trim() !== "") {
+
+            url = `http://localhost:8080/profile/search/industry/${industry}`;
+
+        }
+        else if (year.trim() !== "") {
+
+            url = `http://localhost:8080/profile/search/year/${year}`;
+
+        }
+        else {
 
             loadProfiles();
             return;
@@ -54,7 +76,7 @@ function DirectoryPage() {
         }
 
         axios.get(
-            `http://localhost:8080/profile/search/name/${search}`,
+            url,
             {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -75,11 +97,18 @@ function DirectoryPage() {
             setProfiles(filteredProfiles);
 
         })
-        .catch(error => {
+        .catch(error => console.log(error));
 
-            console.log(error);
+    };
 
-        });
+    const clearFilters = () => {
+
+        setSearch("");
+        setCompany("");
+        setIndustry("");
+        setYear("");
+
+        loadProfiles();
 
     };
 
@@ -95,76 +124,118 @@ function DirectoryPage() {
             <Sidebar />
 
             <div
-                className="container mt-4"
-                style={{ marginLeft: "260px" }}
+                className="container-fluid py-4"
+                style={{
+                    marginLeft: "290px",
+                    width: "calc(100% - 290px)",
+                    paddingRight: "30px"
+                }}
             >
 
-                <h2 className="mb-4">
-                    Alumni Directory
-                </h2>
+                <div className="mb-4">
 
-                <div className="row mb-4">
+                    <h2 className="fw-bold">
+                        🎓 Alumni Directory
+                    </h2>
 
-                    <div className="col-md-10">
+                    <p className="text-muted mb-0">
 
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search by Name..."
-                            value={search}
-                            onChange={(e) => {
+                        {profiles.length} Alumni Found
 
-                                const value = e.target.value;
+                    </p>
 
-                                setSearch(value);
+                </div>
 
-                                if (value.trim() === "") {
+                <div
+                    className="card shadow-sm border-0 mb-4 mx-auto"
+                    style={{
+                        maxWidth: "1350px"
+                    }}
+                >
 
-                                    loadProfiles();
-                                    return;
-                                }
+                    <div className="card-body">
 
-                                axios.get(
-                                    `http://localhost:8080/profile/search/name/${value}`,
-                                    {
-                                        headers: {
-                                            Authorization: `Bearer ${token}`
-                                        }
+                        <div className="row g-2 align-items-center">
+
+                            <div className="col-xl-3 col-lg-6">
+
+                                <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="🔍 Search Name"
+                                    value={search}
+                                    onChange={(e) =>
+                                        setSearch(e.target.value)
                                     }
-                                )
-                                .then(response => {
+                                />
 
-                                    const filteredProfiles = response.data.filter(
-                                        profile =>
-                                            profile.user &&
-                                            (
-                                                profile.user.role === "ALUMNI" ||
-                                                profile.user.role === "MENTOR"
-                                            )
-                                    );
+                            </div>
 
-                                    setProfiles(filteredProfiles);
+                            <div className="col-xl-2 col-lg-6">
 
-                                })
-                                .catch(error => {
+                                <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="🏢 Company"
+                                    value={company}
+                                    onChange={(e) =>
+                                        setCompany(e.target.value)
+                                    }
+                                />
 
-                                    console.log(error);
+                            </div>
 
-                                });
+                            <div className="col-xl-2 col-lg-6">
 
-                            }}
-                        />
+                                <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="🏭 Industry"
+                                    value={industry}
+                                    onChange={(e) =>
+                                        setIndustry(e.target.value)
+                                    }
+                                />
 
-                    </div>
+                            </div>
 
-                    <div className="col-md-2">
+                            <div className="col-xl-2 col-lg-6">
 
-                        <button
-                            className="btn btn-primary w-100"
-                            onClick={searchByName}
-                        >
-                            Search
-                        </button>
+                                <input
+                                    type="number"
+                                    className="form-control form-control-sm"
+                                    placeholder="🎓 Year"
+                                    value={year}
+                                    onChange={(e) =>
+                                        setYear(e.target.value)
+                                    }
+                                />
+
+                            </div>
+
+                            <div className="col-xl-1 col-lg-6 d-grid">
+
+                                <button
+                                    className="btn btn-primary btn-sm"
+                                    onClick={searchProfiles}
+                                >
+                                    Search
+                                </button>
+
+                            </div>
+
+                            <div className="col-xl-2 col-lg-6 d-grid">
+
+                                <button
+                                    className="btn btn-outline-secondary btn-sm"
+                                    onClick={clearFilters}
+                                >
+                                    Clear Filters
+                                </button>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -172,82 +243,176 @@ function DirectoryPage() {
 
                 <div className="row">
 
-                    {
+{
+    profiles.length === 0 ? (
 
-                        profiles.map(profile => (
+        <div className="col-12">
 
-                            <div
-                                className="col-md-4 mb-4"
-                                key={profile.profileId}
+            <div
+                className="alert alert-warning text-center py-3 shadow-sm"
+                role="alert"
+            >
+
+                <h5 className="mb-1">
+                    🔍 No Alumni Found
+                </h5>
+
+                <small>
+                    Try another search or click
+                    <strong> Clear Filters</strong>.
+                </small>
+
+            </div>
+
+        </div>
+
+    ) : (
+
+        profiles.map(profile => (
+
+            <div
+                className="col-xl-4 col-lg-6 col-md-6 mb-4"
+                key={profile.profileId}
+            >
+
+                <div
+                    className="card border-0 shadow h-100"
+                    style={{
+                        transition: "all 0.3s ease",
+                        borderRadius: "15px",
+                        cursor: "pointer"
+                    }}
+                    onMouseEnter={(e) => {
+
+                        e.currentTarget.style.transform =
+                            "translateY(-8px)";
+
+                        e.currentTarget.style.boxShadow =
+                            "0 15px 30px rgba(0,0,0,0.15)";
+
+                    }}
+                    onMouseLeave={(e) => {
+
+                        e.currentTarget.style.transform =
+                            "translateY(0px)";
+
+                        e.currentTarget.style.boxShadow =
+                            "0 .5rem 1rem rgba(0,0,0,.15)";
+
+                    }}
+                >
+
+                    <div className="card-body d-flex flex-column">
+
+                        <div className="text-center">
+
+                            <img
+                                src={
+                                    profile.profilePicture &&
+                                    profile.profilePicture.trim() !== ""
+                                        ? profile.profilePicture
+                                        : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                                }
+                                onError={(e) => {
+                                    e.target.src =
+                                        "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+                                }}
+                                alt="Profile"
+                                width="110"
+                                height="110"
+                                className="rounded-circle border border-3 border-primary mb-3"
+                                style={{
+                                    objectFit: "cover"
+                                }}
+                            />
+
+                            <h4 className="fw-bold mb-2">
+                                {profile.user?.fullName}
+                            </h4>
+
+                            <span
+                                className={
+                                    profile.user?.role === "MENTOR"
+                                        ? "badge bg-success px-3 py-2"
+                                        : "badge bg-primary px-3 py-2"
+                                }
                             >
+                                {profile.user?.role}
+                            </span>
 
-                                <div className="card shadow h-100">
+                        </div>
 
-                                    <div className="card-body text-center">
+                        <hr />
 
-                                        <img
-                                            src={
-                                                profile.profilePicture ||
-                                                "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                                            }
-                                            alt="profile"
-                                            width="100"
-                                            height="100"
-                                            className="rounded-circle mb-3"
-                                        />
+                        <div className="mb-3">
 
-                                        <h4>
-                                            {profile.user?.fullName}
-                                        </h4>
+                            <div className="mb-2">
+                                <strong>🏢 Company</strong>
+                                <br />
+                                {profile.company || "Not Available"}
+                            </div>
 
-                                        <span className="badge bg-primary">
-                                            {profile.user?.role}
-                                        </span>
+                            <div className="mb-2">
+                                <strong>💼 Designation</strong>
+                                <br />
+                                {profile.designation || "Not Available"}
+                            </div>
 
-                                        <hr />
+                            <div className="mb-2">
+                                <strong>🏭 Industry</strong>
+                                <br />
+                                {profile.industry || "Not Available"}
+                            </div>
 
-                                        <p>
-                                            <strong>Company:</strong>
-                                            <br />
-                                            {profile.company || "N/A"}
-                                        </p>
+                            <div className="mb-2">
+                                <strong>🎓 Graduation Year</strong>
+                                <br />
+                                {profile.graduationYear || "Not Available"}
+                            </div>
 
-                                        <p>
-                                            <strong>Designation:</strong>
-                                            <br />
-                                            {profile.designation || "N/A"}
-                                        </p>
+                            <div className="mb-2">
+                                <strong>📝 About Me</strong>
+                                <br />
 
-                                        <p>
-                                            <strong>Industry:</strong>
-                                            <br />
-                                            {profile.industry || "N/A"}
-                                        </p>
+                                <small className="text-muted">
 
-                                        <p>
-                                            <strong>Graduation Year:</strong>
-                                            <br />
-                                            {profile.graduationYear || "N/A"}
-                                        </p>
+                                    {
+                                        profile.aboutMe
+                                            ? profile.aboutMe.length > 80
+                                                ? profile.aboutMe.substring(0, 80) + "..."
+                                                : profile.aboutMe
+                                            : "No description available."
+                                    }
 
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={() =>
-                                                navigate(`/directory/profile/${profile.user.userId}`)
-                                            }
-                                        >
-                                            View Profile
-                                        </button>
-
-                                    </div>
-
-                                </div>
+                                </small>
 
                             </div>
 
-                        ))
+                        </div>
 
-                    }
+                        <div className="mt-auto">
+
+                            <button
+    className="btn btn-primary w-100 rounded-pill"
+    onClick={() =>
+        navigate(`/directory/profile/${profile.user.userId}`)
+    }
+>
+    👤 View Professional Profile
+</button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        ))
+
+    )
+}
 
                 </div>
 
@@ -260,3 +425,4 @@ function DirectoryPage() {
 }
 
 export default DirectoryPage;
+                        
